@@ -1,4 +1,14 @@
 const book = document.querySelector('#book');
+const pageRight = document.querySelector('.page-right');
+pageRight.style.overflowY = 'auto';
+pageRight.style.overflowX = 'hidden';
+document.querySelectorAll('.hotspot').forEach((hotspot) => {
+  const savedPosition = localStorage.getItem(`fina-hotspot-${hotspot.classList[1]}`);
+  if (!savedPosition) return;
+  const { left, top } = JSON.parse(savedPosition);
+  hotspot.style.left = `${left}%`;
+  hotspot.style.top = `${top}%`;
+});
 const closeBook = document.querySelector('#close-book');
 const nextPage = document.querySelector('#next-page');
 const prevPage = document.querySelector('#prev-page');
@@ -17,8 +27,8 @@ document.querySelectorAll('.hotspot').forEach((hotspot, index) => {
   hotspot.addEventListener('click', () => {
     const label = index === 0 ? 'dem Fuchs' : `Höhle ${index}`;
     if (index === 0 || index === 1 || index === 2 || index === 3 || index === 4 || index === 5 || index === 6 || index === 7 || index === 8 || index === 9 || index === 10) {
-      const story = index === 10 ? window.cave10HTML : index === 9 ? window.cave9HTML : index === 8 ? window.cave8HTML : index === 0 ? window.prologHTML : index === 1 ? window.cave2HTML : index === 2 ? window.cave3HTML : index === 3 ? window.cave4ShadowHTML : index === 4 ? window.cave4HTML : index === 5 ? window.cave6HTML : index === 6 ? window.cave5HTML : window.cave7HTML;
-      const normalizedStory = index === 7 ? story.replace('Kapitel 6 – Die gewölbte Grotte', 'Kapitel 7 – Die gewölbte Kammer').replace('Das Geheimnis des gesammelten Lichts', 'Das Geheimnis des zerstreuten Lichts') : story;
+      const story = index === 10 ? window.cave8HTML : index === 9 ? window.cave9HTML : index === 8 ? window.cave10HTML : index === 7 ? window.cave7HTML : index === 6 ? window.cave6HTML : index === 5 ? window.cave5HTML : index === 0 ? window.prologHTML : index === 1 ? window.cave2HTML : index === 2 ? window.cave3HTML : index === 3 ? window.cave4ShadowHTML : window.cave4HTML;
+      const normalizedStory = story;
       let paragraphs = normalizedStory.match(/<(?:h1|h2|p)>[\s\S]*?<\/(?:h1|h2|p)>/g) || [];
       if (paragraphs.length === 0) paragraphs = [`<p class="placeholder-text">Platzhalter für Höhle ${index}</p>`];
       currentPages = [];
@@ -26,7 +36,7 @@ document.querySelectorAll('.hotspot').forEach((hotspot, index) => {
       let paragraphCount = 0;
       paragraphs.forEach((part) => {
         if (part.startsWith('<p>')) paragraphCount += 1;
-        const limitReached = page.length > (index === 3 ? 1900 : index === 6 ? 1700 : index === 5 ? 1250 : index === 7 ? (currentPages.length === 0 ? 1150 : currentPages.length === 1 ? 1600 : 1800) : index === 9 ? (currentPages.length === 0 ? 1250 : currentPages.length === 1 ? 1300 : 1500) : index === 10 ? 1300 : 1400) || (index === 3 && paragraphCount > 22) || (index === 6 && paragraphCount > 20) || (index === 5 && paragraphCount > 18) || (index === 7 && paragraphCount > (currentPages.length === 0 ? 16 : currentPages.length === 1 ? 24 : 26));
+        const limitReached = page.length > (index === 1 ? 1310 : index === 3 ? 1900 : index === 6 ? 1700 : index === 5 ? 1250 : index === 7 ? (currentPages.length === 0 ? 1150 : currentPages.length === 1 ? 1580 : 1800) : index === 8 ? (currentPages.length === 0 ? 1340 : currentPages.length === 1 ? 1350 : 1400) : index === 9 ? (currentPages.length === 0 ? 1250 : currentPages.length === 1 ? 1300 : 1500) : index === 10 ? 1300 : 1400) || (index === 3 && paragraphCount > 22) || (index === 6 && paragraphCount > 20) || (index === 5 && paragraphCount > 18) || (index === 7 && paragraphCount > (currentPages.length === 0 ? 16 : currentPages.length === 1 ? 24 : 26));
         if (limitReached && part.startsWith('<p>')) { currentPages.push(page); page = ''; paragraphCount = 1; }
         page += part;
       });
