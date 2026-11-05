@@ -2,12 +2,37 @@ const book = document.querySelector('#book');
 const pageRight = document.querySelector('.page-right');
 pageRight.style.overflowY = 'auto';
 pageRight.style.overflowX = 'hidden';
+const hotspotStorageKey = (hotspot) => 'fina-hotspot-' + hotspot.classList[1];
 document.querySelectorAll('.hotspot').forEach((hotspot) => {
-  const savedPosition = localStorage.getItem(`fina-hotspot-${hotspot.classList[1]}`);
+  const savedPosition = localStorage.getItem(hotspotStorageKey(hotspot));
   if (!savedPosition) return;
-  const { left, top } = JSON.parse(savedPosition);
-  hotspot.style.left = `${left}%`;
-  hotspot.style.top = `${top}%`;
+  try {
+    const { left, top } = JSON.parse(savedPosition);
+    if (Number.isFinite(left) && Number.isFinite(top)) {
+      hotspot.style.left = left + '%';
+      hotspot.style.top = top + '%';
+    }
+  } catch (error) {
+    console.warn('Ungültiger localStorage-Wert für ' + hotspotStorageKey(hotspot), error);
+  }
+});
+document.querySelector('#export-positions').addEventListener('click', () => {
+  const hotspots = [...document.querySelectorAll('.hotspot')].map((hotspot, index) => {
+    const style = getComputedStyle(hotspot);
+    const map = hotspot.parentElement;
+    const inlineLeft = Number.parseFloat(hotspot.style.left);
+    const inlineTop = Number.parseFloat(hotspot.style.top);
+    const left = Number.isFinite(inlineLeft) ? inlineLeft : Number.parseFloat(style.left) / map.clientWidth * 100;
+    const top = Number.isFinite(inlineTop) ? inlineTop : Number.parseFloat(style.top) / map.clientHeight * 100;
+    const savedKey = hotspotStorageKey(hotspot);
+    return { id: index, label: hotspot.getAttribute('aria-label'), storageKey: savedKey, left, top, width: Number.parseFloat(style.width) / map.clientWidth * 100, height: Number.parseFloat(style.height) / map.clientHeight * 100, localStorageValue: localStorage.getItem(savedKey) };
+  });
+  const payload = { version: 1, exportedAt: new Date().toISOString(), source: 'Finas Höhlenkarte Go-Live', hotspots };
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+  link.download = 'fina-klickpositionen.json';
+  link.click();
+  URL.revokeObjectURL(link.href);
 });
 const closeBook = document.querySelector('#close-book');
 const nextPage = document.querySelector('#next-page');
