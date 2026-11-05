@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a1b">
+    <title>Fina – Das Geheimnis des verlorenen Lichts</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/main.js" defer></script>
+  </head>
+  <body>
+    <main class="map-app">
+      <section class="map-viewport" id="map-viewport" aria-label="Interaktive Höhlenkarte">
+        <div class="map-stage" id="map-stage">
+          <img class="cave-map" id="cave-map" src="assets/images/hoehlenwelt.png" alt="Die illustrierte Höhlenwelt" draggable="false">
+          <svg class="map-overlay" id="map-overlay" viewBox="0 0 1000 561.5296" preserveAspectRatio="none" aria-label="Kammern, Wege und Fina">
+            <defs>
+              <radialGradient id="lamp-gradient"><stop offset="0" stop-color="white"/><stop offset="0.54" stop-color="white" stop-opacity=".86"/><stop offset="1" stop-color="black"/></radialGradient>
+              <mask id="light-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="562">
+                <rect width="1000" height="562" fill="black"/>
+                <g id="light-holes"></g>
+              </mask>
+              <filter id="soft-light" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
+              <filter id="fina-shadow-blur" x="-70%" y="-150%" width="240%" height="400%"><feGaussianBlur stdDeviation="1.5"/></filter>
+              <clipPath id="fina-frame"><rect x="-20" y="-40" width="40" height="40"/></clipPath>
+              <radialGradient id="warm-glow"><stop stop-color="#ffe4a0" stop-opacity=".5"/><stop offset="1" stop-color="#ffb84d" stop-opacity="0"/></radialGradient>
+              <radialGradient id="cool-glow"><stop stop-color="#8cf5e8" stop-opacity=".4"/><stop offset="1" stop-color="#37cbbb" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect class="darkness" width="1000" height="562" fill="#071116" mask="url(#light-mask)"/>
+            <g id="glows" pointer-events="none"></g>
+            <g id="route-layer" class="route-layer"></g>
+            <g id="start-layer" class="start-layer"></g>
+            <g id="room-layer" class="room-layer"></g>
+            <g id="node-layer" class="node-layer"></g>
+            <g id="fina" class="fina" aria-label="Fina, die Füchsin">
+              <ellipse class="fina-shadow" cx="0" cy="1" rx="8.5" ry="2.3" fill="#07100f" opacity=".48" filter="url(#fina-shadow-blur)"/>
+              <image id="fina-sprite" x="-20" y="-40" width="200" height="320" href="assets/images/fina-spritesheet.webp" preserveAspectRatio="none" clip-path="url(#fina-frame)"/>
+            </g>
+          </svg>
+        </div>
+        <div class="image-notice" id="image-notice" role="status" hidden>Die Höhlenillustration fehlt: <strong>assets/images/hoehlenwelt.png</strong></div>
+        <header class="topbar">
+          <div class="brand"><span class="brand-mark" aria-hidden="true">F</span><span>FINA <small>HÖHLENKARTE</small></span></div>
+          <div class="toolbar" aria-label="Kartensteuerung">
+            <button class="tool-button" id="zoom-out" type="button" title="Zoom −" aria-label="Karte verkleinern"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="zoom-readout" id="zoom-readout">100%</span>
+            <button class="tool-button" id="zoom-in" type="button" title="Zoom +" aria-label="Karte vergrößern"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+            <i class="separator"></i>
+            <button class="tool-button" id="fit-map" type="button" title="Gesamte Höhle anzeigen" aria-label="Gesamte Höhle anzeigen"><svg viewBox="0 0 24 24"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/></svg></button>
+            <button class="tool-button" id="fullscreen" type="button" title="Vollbildmodus" aria-label="Vollbildmodus"><svg class="fullscreen-enter" viewBox="0 0 24 24"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/></svg><svg class="fullscreen-exit" viewBox="0 0 24 24"><path d="M4 8h4V4m8 0v4h4m0 8h-4v4m-8 0v-4H4"/></svg></button>
+            <i class="separator"></i>
+            <button class="editor-toggle" id="editor-toggle" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="m4 16.5 10.9-10.9a2.1 2.1 0 0 1 3 3L7 19H4v-2.5Z"/><path d="m13.5 7.5 3 3"/></svg><span>Karteneditor</span></button>
+          </div>
+        </header>
+        <aside class="editor-panel" id="editor-panel" hidden>
+          <div class="panel-heading"><div><span class="eyebrow">LEHRKRAFT</span><h1>Karteneditor</h1></div><button class="close-panel" id="close-editor" type="button" aria-label="Editor schließen">×</button></div>
+          <div class="editor-section">
+            <h2>Werkzeug</h2>
+            <div class="tool-grid" role="group" aria-label="Editorwerkzeug">
+              <button class="mode-button active" data-mode="room" type="button">Kammer setzen</button>
+              <button class="mode-button" data-mode="area" type="button">Klickbereich ziehen</button>
+              <button class="mode-button" data-mode="draw" type="button">Laufweg zeichnen</button>
+              <button class="mode-button" data-mode="connect" type="button">Verbinden</button>
+              <button class="mode-button" data-mode="insert" type="button">Punkt einfügen</button>
+              <button class="mode-button" data-mode="roomLink" type="button">Kammer anbinden</button>
+              <button class="mode-button" data-mode="move" type="button">Verschieben</button>
+              <button class="mode-button" data-mode="delete" type="button">Löschen</button>
+              <button class="mode-button" data-mode="foxStart" type="button">Finas Startposition festlegen</button>
+            </div>
+            <p class="tool-help" id="tool-help">Klicke auf die Karte, um die ausgewählte Kammerposition festzulegen.</p>
+          </div>
+          <div class="editor-section">
+            <h2>Kammern</h2>
+            <div class="room-list" id="room-list"></div>
+          </div>
+          <div class="editor-section">
+            <h2>Kammer-Haltepunkte</h2>
+            <div class="route-selects">
+              <label>Kammer auswählen<select id="hold-room"></select></label>
+              <label>Haltepunkt auswählen<select id="hold-node"></select></label>
+            </div>
+            <button class="secondary-button" id="assign-hold" type="button">Haltepunkt zuordnen</button>
+            <div class="hold-list" id="hold-list" aria-live="polite"></div>
+            <button class="primary-button" id="test-room-hold" type="button">Kammer anlaufen testen</button>
+            <p class="route-feedback" id="room-hold-feedback" aria-live="polite"></p>
+          </div>
+          <p class="route-feedback" id="start-warning" aria-live="polite"></p>
+          <div class="editor-section">
+            <h2>Weg testen</h2>
+            <button class="primary-button" id="test-to-node" type="button">Weg bis hier testen</button>
+            <p class="route-feedback" id="node-test-feedback" aria-live="polite"></p>
+          </div>
+          <div class="editor-section">
+            <h2>Route testen</h2>
+            <div class="route-selects"><label>Von<select id="route-from"></select></label><label>Nach<select id="route-to"></select></label></div>
+            <button class="primary-button" id="test-route" type="button">Laufweg testen</button>
+            <p class="route-feedback" id="route-feedback" aria-live="polite"></p>
+            <div class="test-debug" id="test-debug" aria-live="polite"></div>
+          </div>
+          <div class="editor-section">
+            <h2>Bewegung unabhängig testen</h2>
+            <button class="secondary-button" id="free-move-test" type="button">Fina 100 Pixel bewegen</button>
+          </div>
+          <div class="editor-section editor-actions">
+            <button class="secondary-button" id="save-map" type="button">Karte speichern</button>
+            <div class="config-actions">
+              <button class="secondary-button" id="export-rooms" type="button">Kammern exportieren (JSON)</button>
+              <button class="secondary-button" id="import-rooms-button" type="button">JSON importieren</button>
+              <input id="import-rooms" type="file" accept="application/json,.json" hidden>
+            </div>
+            <div class="config-actions">
+              <button class="secondary-button" id="export-routes" type="button">Wege exportieren (JSON)</button>
+              <button class="secondary-button" id="import-routes-button" type="button">Wege importieren (JSON)</button>
+              <input id="import-routes" type="file" accept="application/json,.json" hidden>
+            </div>
+            <button class="text-button" id="clear-map" type="button">Kartendaten löschen</button>
+          </div>
+          <p class="storage-note" id="storage-note">Kartenpunkte werden nur in diesem Browser gespeichert.</p>
+        </aside>
+        <section class="story-screen" id="story-screen" aria-label="Finas Höhlengeschichte" hidden>
+          <article class="story-reader" id="story-reader" aria-labelledby="story-title" aria-modal="true" role="dialog">
+            <div class="story-ornament" aria-hidden="true"><span></span><i></i><span></span></div>
+            <p class="story-eyebrow" id="story-eyebrow">FINAS HÖHLENCHRONIK</p>
+            <h1 id="story-title"></h1>
+            <div class="story-copy" id="story-copy"></div>
+            <div class="mission-copy" id="mission-copy" hidden>
+              <p>Hier beginnt bald Finas Forschungsmission.</p>
+            </div>
+            <footer class="story-actions">
+              <button class="story-button story-button-primary" id="story-mission" type="button">Weiter zur Forschungsmission</button>
+              <button class="story-button" id="story-return" type="button">Zur Höhlenkarte</button>
+            </footer>
+          </article>
+        </section>
+        <div class="setup-prompt" id="setup-prompt" role="status">
+          <span class="prompt-dot"></span><span>Richte im Karteneditor Kammern und verbundene Wegpunkte ein, damit Fina laufen kann.</span>
+          <button type="button" id="open-editor">Editor öffnen</button>
+        </div>
+        <div class="explored-toast" id="explored-toast" hidden><span id="toast-text">Kammer erkundet</span><button type="button" id="unlock-next">Kammer erkundet</button></div>
+        <div class="map-hint" id="map-hint">Karte ziehen zum Verschieben</div>
+      </section>
+    </main>
+  </body>
+</html>

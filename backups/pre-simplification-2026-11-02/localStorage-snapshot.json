@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-11-02",
+  "entries": {
+    "fina-cave-map-v1": "{\"nodes\":[],\"edges\":[]}",
+    "fina-cave-rooms-v1": "[{\"id\":1,\"x\":390.0023193359375,\"y\":99.53759765625,\"area\":null},{\"id\":2,\"x\":null,\"y\":null,\"area\":null},{\"id\":3,\"x\":null,\"y\":null,\"area\":null},{\"id\":4,\"x\":null,\"y\":null,\"area\":null},{\"id\":5,\"x\":null,\"y\":null,\"area\":null},{\"id\":6,\"x\":null,\"y\":null,\"area\":null},{\"id\":7,\"x\":null,\"y\":null,\"area\":null},{\"id\":8,\"x\":null,\"y\":null,\"area\":null},{\"id\":9,\"x\":null,\"y\":null,\"area\":null},{\"id\":10,\"x\":null,\"y\":null,\"area\":null}]",
+    "fina-cave-progress-v1": null,
+    "fina-cave-fox-start-v1": null
+  },
+  "note": "Raw localStorage strings at backup time. No browser data was changed or removed."
+}
