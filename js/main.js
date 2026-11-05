@@ -1,7 +1,6 @@
 const book = document.querySelector('#book');
 const pageRight = document.querySelector('.page-right');
-pageRight.style.overflowY = 'auto';
-pageRight.style.overflowX = 'hidden';
+pageRight.style.overflow = 'hidden';
 const hotspotStorageKey = (hotspot) => 'fina-hotspot-' + hotspot.classList[1];
 document.querySelectorAll('.hotspot').forEach((hotspot) => {
   const savedPosition = localStorage.getItem(hotspotStorageKey(hotspot));
@@ -42,10 +41,61 @@ let currentPages = [];
 let currentPage = 0;
 function showPage() {
   document.querySelector('#placeholder').innerHTML = currentPages[currentPage] || '';
-  nextPage.hidden = currentPage >= currentPages.length - 1;
+  nextPage.hidden = currentPages.length === 0;
   prevPage.hidden = currentPage === 0;
-  nextPage.textContent = `Nächste Seite  →  (${currentPage + 1}/${currentPages.length})`;
-  document.querySelector('.page-right').scrollTop = 0;
+  nextPage.textContent = currentPage >= currentPages.length - 1
+    ? 'Schließen'
+    : `Weiter  →  (${currentPage + 1}/${currentPages.length})`;
+}
+function splitAtSentenceBoundaries(parts) {
+  return parts.flatMap((part) => {
+    const match = part.match(/^<p>([\s\S]*)<\/p>$/);
+    if (!match || match[1].includes('<')) return [part];
+    const sentences = match[1].trim().split(/(?<=[.!?])\s+/u).filter(Boolean);
+    return sentences.map((sentence) => '<p>' + sentence + '</p>');
+  });
+}
+function paginateStory(parts) {
+  const placeholder = document.querySelector('#placeholder');
+  const pageRightElement = document.querySelector('.page-right');
+  const measure = document.createElement('div');
+  const placeholderStyle = getComputedStyle(placeholder);
+  measure.style.cssText = [
+    'position:absolute',
+    'visibility:hidden',
+    'pointer-events:none',
+    'overflow:hidden',
+    'width:' + placeholder.clientWidth + 'px',
+    'font:' + placeholderStyle.font,
+    'line-height:' + placeholderStyle.lineHeight,
+    'letter-spacing:' + placeholderStyle.letterSpacing,
+    'white-space:normal'
+  ].join(';');
+  const availableHeight = Math.max(1, placeholder.clientHeight);
+  pageRightElement.appendChild(measure);
+  const heightOf = (partsOnPage) => {
+    measure.innerHTML = partsOnPage.join('');
+    return measure.scrollHeight;
+  };
+  const totalHeight = heightOf(parts);
+  const pageCount = Math.max(1, Math.ceil(totalHeight / availableHeight));
+  const targetHeight = totalHeight / pageCount;
+  const pages = [];
+  let remaining = parts.slice();
+  for (let pageIndex = 0; pageIndex < pageCount && remaining.length; pageIndex += 1) {
+    const pageParts = [];
+    while (remaining.length) {
+      const candidate = pageParts.concat(remaining[0]);
+      const candidateHeight = heightOf(candidate);
+      const pagesAfter = pageCount - pageIndex - 1;
+      if (pageParts.length && candidateHeight > availableHeight) break;
+      pageParts.push(remaining.shift());
+      if (pagesAfter > 0 && candidateHeight >= targetHeight) break;
+    }
+    pages.push(pageParts);
+  }
+  measure.remove();
+  return pages.map((partsOnPage) => partsOnPage.join(''));
 }
 let bookTimer;
 document.querySelectorAll('.hotspot').forEach((hotspot, index) => {
@@ -56,16 +106,10 @@ document.querySelectorAll('.hotspot').forEach((hotspot, index) => {
       const normalizedStory = story;
       let paragraphs = normalizedStory.match(/<(?:h1|h2|p)>[\s\S]*?<\/(?:h1|h2|p)>/g) || [];
       if (paragraphs.length === 0) paragraphs = [`<p class="placeholder-text">Platzhalter für Höhle ${index}</p>`];
-      currentPages = [];
-      let page = '';
-      let paragraphCount = 0;
-      paragraphs.forEach((part) => {
-        if (part.startsWith('<p>')) paragraphCount += 1;
-        const limitReached = page.length > (index === 1 ? 1310 : index === 3 ? 1900 : index === 6 ? 1700 : index === 5 ? 1250 : index === 7 ? (currentPages.length === 0 ? 1150 : currentPages.length === 1 ? 1580 : 1800) : index === 8 ? (currentPages.length === 0 ? 1340 : currentPages.length === 1 ? 1350 : 1400) : index === 9 ? (currentPages.length === 0 ? 1250 : currentPages.length === 1 ? 1300 : 1500) : index === 10 ? 1300 : 1400) || (index === 3 && paragraphCount > 22) || (index === 6 && paragraphCount > 20) || (index === 5 && paragraphCount > 18) || (index === 7 && paragraphCount > (currentPages.length === 0 ? 16 : currentPages.length === 1 ? 24 : 26));
-        if (limitReached && part.startsWith('<p>')) { currentPages.push(page); page = ''; paragraphCount = 1; }
-        page += part;
-      });
-      if (page) currentPages.push(page);
+      const wasHidden = book.hidden;
+      book.hidden = false;
+      currentPages = paginateStory(splitAtSentenceBoundaries(paragraphs));
+      book.hidden = wasHidden;
       currentPage = 0;
       showPage();
     } else {
@@ -82,6 +126,13 @@ document.querySelectorAll('.hotspot').forEach((hotspot, index) => {
   });
 });
 closeBook.addEventListener('click', () => { book.hidden = true; });
-nextPage.addEventListener('click', () => { if (currentPage < currentPages.length - 1) { currentPage += 1; showPage(); } });
+nextPage.addEventListener('click', () => {
+  if (currentPage < currentPages.length - 1) {
+    currentPage += 1;
+    showPage();
+  } else {
+    book.hidden = true;
+  }
+});
 prevPage.addEventListener('click', () => { if (currentPage > 0) { currentPage -= 1; showPage(); } });
 book.addEventListener('click', (event) => { if (event.target === book) book.hidden = true; });
