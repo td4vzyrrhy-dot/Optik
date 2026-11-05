@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source": "localStorage export from Go-Live",
+  "hotspots": [
+    { "id": 0, "label": "Fuchs", "left": 5.748315, "top": 52.447035, "width": 8, "height": 10 },
+    { "id": 1, "label": "Höhle 1", "left": 43.114625, "top": 11.722681, "width": 8, "height": 10 },
+    { "id": 2, "label": "Höhle 2", "left": 61.489667, "top": 5.014153, "width": 8, "height": 8 },
+    { "id": 3, "label": "Höhle 3", "left": 83.762255, "top": 11.913169, "width": 8, "height": 10 },
+    { "id": 4, "label": "Höhle 4", "left": 23.388411, "top": 20.622713, "width": 8, "height": 10 },
+    { "id": 5, "label": "Höhle 5", "left": 76.408966, "top": 42.325094, "width": 7, "height": 10 },
+    { "id": 6, "label": "Höhle 6", "left": 42.451398, "top": 51.025346, "width": 8, "height": 10 },
+    { "id": 7, "label": "Höhle 7", "left": 82.893619, "top": 59.90858, "width": 7, "height": 10 },
+    { "id": 8, "label": "Höhle 8", "left": 68.698474, "top": 76.934898, "width": 8, "height": 10 },
+    { "id": 9, "label": "Höhle 9", "left": 41.827164, "top": 76.76907, "width": 8, "height": 10 },
+    { "id": 10, "label": "Höhle 10", "left": 26.106771, "top": 73.848139, "width": 8, "height": 10 }
+  ]
+}
