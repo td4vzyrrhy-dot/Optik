@@ -136,3 +136,17 @@ nextPage.addEventListener('click', () => {
 });
 prevPage.addEventListener('click', () => { if (currentPage > 0) { currentPage -= 1; showPage(); } });
 book.addEventListener('click', (event) => { if (event.target === book) book.hidden = true; });
+const passwordForm = document.querySelector('#password-form');
+const passwordGate = document.querySelector('#password-gate');
+const passwordInput = document.querySelector('#password-input');
+const passwordError = document.querySelector('#password-error');
+passwordForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (passwordInput.value === 'Lumi-7Sterne!') {
+    passwordGate.hidden = true;
+    passwordInput.value = '';
+  } else {
+    passwordError.hidden = false;
+    passwordInput.select();
+  }
+});
