@@ -102,7 +102,7 @@ document.querySelectorAll('.hotspot').forEach((hotspot, index) => {
   hotspot.addEventListener('click', () => {
     const label = index === 0 ? 'dem Fuchs' : `Höhle ${index}`;
     if (index === 0 || index === 1 || index === 2 || index === 3 || index === 4 || index === 5 || index === 6 || index === 7 || index === 8 || index === 9 || index === 10) {
-      const story = index === 10 ? window.cave8HTML : index === 9 ? window.cave9HTML : index === 8 ? window.cave10HTML : index === 7 ? window.cave7HTML : index === 6 ? window.cave6HTML : index === 5 ? window.cave5HTML : index === 0 ? window.prologHTML : index === 1 ? window.cave2HTML : index === 2 ? window.cave3HTML : index === 3 ? window.cave4ShadowHTML : window.cave4HTML;
+      const story = index === 10 ? window.cave8HTML : index === 9 ? window.cave9HTML : index === 8 ? window.cave10HTML : index === 7 ? window.cave7HTML : index === 6 ? window.cave5HTML : index === 5 ? window.cave6HTML : index === 0 ? window.prologHTML : index === 1 ? window.cave2HTML : index === 2 ? window.cave3HTML : index === 3 ? window.cave4ShadowHTML : window.cave4HTML;
       const normalizedStory = story;
       let paragraphs = normalizedStory.match(/<(?:h1|h2|p)>[\s\S]*?<\/(?:h1|h2|p)>/g) || [];
       if (paragraphs.length === 0) paragraphs = [`<p class="placeholder-text">Platzhalter für Höhle ${index}</p>`];
